@@ -92,16 +92,10 @@ class RRT:
         plt.title('RED = start, GREEN = dir, BLACK = new')
         plt.show()
         """
-        plt.plot([qsx, new_x], [qsy, new_y])
-        print("QSTART")
-        q_start.pr()
-        print("QSTART")
+        plt.plot([qsx, new_x], [qsy, new_y], color='b')
         new_node = Node((new_x, new_y))
         q_start.add_child(new_node)
         new_node.add_parent(q_start)
-        print("QSTART")
-        q_start.pr()
-        print("QSTART")
         print('val',q_start.val)
         print('children',q_start.children)
 
@@ -110,6 +104,7 @@ class RRT:
     def go(self):
         # Run RRT
         print("GO")
+        plt.scatter(self.qinit[0], self.qinit[1], color='k')
         for i in range(0, self.k):
             print()
             print()
@@ -124,6 +119,6 @@ class RRT:
 d = [(0,100),(0,100)]
 qinit = (50,50)
 delta = 1
-k = 5
+k = 50
 Task1 = RRT(qinit, k, delta, d)
 Task1.go()

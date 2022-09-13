@@ -4,7 +4,6 @@ import random
 
 
 class Node:
-    indent = 0
 
     def __init__(self,val):
         self.parent = None
@@ -54,7 +53,7 @@ class RRT:
         print('initial dist is', closest_dist)
         for n in closest_node.children: 
             print(n)
-            subtree_dist, subtree_node = self.nearest_vertex(n.val, pos)
+            subtree_dist, subtree_node = self.nearest_vertex(n, pos)
             if subtree_dist < closest_dist: 
                 closest_dist = subtree_dist
                 closest_node = subtree_node
@@ -93,6 +92,7 @@ class RRT:
         plt.title('RED = start, GREEN = dir, BLACK = new')
         plt.show()
         """
+        plt.plot([qsx, new_x], [qsy, new_y])
         print("QSTART")
         q_start.pr()
         print("QSTART")
@@ -111,16 +111,19 @@ class RRT:
         # Run RRT
         print("GO")
         for i in range(0, self.k):
+            print()
+            print()
             self.g.pr()
             qrand = self.random_configuration()
             qnear_dist, qnear = self.nearest_vertex(self.g, qrand)
             qnew = self.new_configuration(qnear, qrand)
         self.g.pr()
+        plt.show()
 
 
 d = [(0,100),(0,100)]
 qinit = (50,50)
 delta = 1
-k = 1
+k = 5
 Task1 = RRT(qinit, k, delta, d)
 Task1.go()

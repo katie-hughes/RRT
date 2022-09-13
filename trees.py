@@ -4,10 +4,22 @@ import random
 
 
 class Node:
-    def __init__(self,start):
+    indent = 0
+
+    def __init__(self,val):
         self.parent = None
-        self.val = start
+        self.val = val
         self.children = []
+    def add_parent(self, p):
+        self.parent = p
+    def add_child(self, c):
+        self.children.append(c)
+    def pr(self,lvl=0):
+        if len(self.children)==0:
+            print(f"Val {lvl}:{self.val}")
+        else: 
+            for c in self.children: 
+                c.pr(lvl=lvl+1)
 
 
 class RRT:
@@ -18,6 +30,7 @@ class RRT:
         self.d = d
 
         self.g = Node(qinit)
+        self.g.pr()
     
     def distance(self, p1, p2):
         return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
@@ -30,16 +43,23 @@ class RRT:
         print("Random:", x,y)
         return (x,y)
     
-    def nearest_vertex(self, pos):
+    def nearest_vertex(self, nd, pos):
         # find the vertex in g closest to given pos
         print("Nearest vertex")
-        closest = self.g
-        dist = self.distance(self.g.val, pos)
-        print(closest)
-        print(dist)
-        for n in self.g.children: 
+        print('position', pos)
+        print('node', nd)
+        print('node children',nd.children)
+        closest_node = nd
+        closest_dist = self.distance(closest_node.val, pos)
+        print('initial dist is', closest_dist)
+        for n in closest_node.children: 
             print(n)
-        return closest
+            subtree_dist, subtree_node = self.nearest_vertex(n.val, pos)
+            if subtree_dist < closest_dist: 
+                closest_dist = subtree_dist
+                closest_node = subtree_node
+        print("closest dist is", closest_dist)
+        return closest_dist, closest_node
             
         
     def new_configuration(self, q_start, q_direction):
@@ -66,11 +86,24 @@ class RRT:
             new_x = qsx + x
             new_y = qsy + y
         print(new_x, new_y)
+        """
         plt.scatter(qsx, qsy, color='r')
         plt.scatter(qdx, qdy, color='g')
         plt.scatter(new_x, new_y, color='k')
         plt.title('RED = start, GREEN = dir, BLACK = new')
         plt.show()
+        """
+        print("QSTART")
+        q_start.pr()
+        print("QSTART")
+        new_node = Node((new_x, new_y))
+        q_start.add_child(new_node)
+        new_node.add_parent(q_start)
+        print("QSTART")
+        q_start.pr()
+        print("QSTART")
+        print('val',q_start.val)
+        print('children',q_start.children)
 
 
     
@@ -78,14 +111,16 @@ class RRT:
         # Run RRT
         print("GO")
         for i in range(0, self.k):
+            self.g.pr()
             qrand = self.random_configuration()
-            qnear = self.nearest_vertex(qrand)
+            qnear_dist, qnear = self.nearest_vertex(self.g, qrand)
             qnew = self.new_configuration(qnear, qrand)
+        self.g.pr()
 
 
 d = [(0,100),(0,100)]
 qinit = (50,50)
 delta = 1
-k = 10
+k = 1
 Task1 = RRT(qinit, k, delta, d)
 Task1.go()

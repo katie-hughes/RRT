@@ -5,6 +5,7 @@ import random
 
 class Node:
     def __init__(self,start):
+        self.parent = None
         self.val = start
         self.children = []
 
@@ -43,8 +44,34 @@ class RRT:
         
     def new_configuration(self, q_start, q_direction):
         print("new config")
+        print(q_start)
+        print(q_direction)
+        qsx = q_start.val[0]
+        qsy = q_start.val[1]
+        qdx = q_direction[0]
+        qdy = q_direction[1]
+        ## CHECK DIV BY 0
         # generate new tree config by moving delta from one vertex to another
-        
+        theta = np.arctan((qdy - qsy)/(qdx - qsx))
+        print(theta)
+        print(theta/np.pi, "radians")
+        print(theta*180/np.pi, "deg")
+        y = self.delta * np.sin(theta)
+        x = self.delta * np.cos(theta)
+        print(x, y)
+        if (qdx-qsx)<0: 
+            new_x = qsx - x
+            new_y = qsy - y
+        else: 
+            new_x = qsx + x
+            new_y = qsy + y
+        print(new_x, new_y)
+        plt.scatter(qsx, qsy, color='r')
+        plt.scatter(qdx, qdy, color='g')
+        plt.scatter(new_x, new_y, color='k')
+        plt.title('RED = start, GREEN = dir, BLACK = new')
+        plt.show()
+
 
     
     def go(self):
@@ -59,6 +86,6 @@ class RRT:
 d = [(0,100),(0,100)]
 qinit = (50,50)
 delta = 1
-k = 3
+k = 10
 Task1 = RRT(qinit, k, delta, d)
 Task1.go()

@@ -8,6 +8,27 @@ def distance(p1, p2):
     return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
 
 
+def inBetween(a, b, c): 
+    #checks if c is in between a and b
+    ax = a[0]
+    ay = a[1]
+    bx = b[0]
+    by = b[1]
+    cx = c[0]
+    cy = c[1]
+    if ax < bx: 
+        if ay < by: 
+            return (ax < cx < bx and ay < cx < by)
+        else: 
+            return (ax < cx < bx and by < cx < ay)
+    else: 
+        if ay < by: 
+            return (bx < cx < ax and ay < cx < by)
+        else: 
+            return (bx < cx < ax and by < cx < ay)
+
+
+
 class Node:
 
     def __init__(self,val):
@@ -146,18 +167,20 @@ class RRT:
                 plt.gca().set_aspect('equal', adjustable='box')
                 plt.show()
                 """
+                if distance((new_x, new_y), c.c) < c.r:
+                    # The new point is inside of the circle (bad)
+                    print("Intersect!!!")
+                    return False
                 if distance((x_int, y_int), c.c) < c.r: 
-                    print("INTERSECT!!!!")
-                    return False
-                if qsx < x_int < new_x and qsy < y_int < new_y: 
-                    print("\nINTERSEECITON2!!!\n")
-                    return False
+                    # Intersection point is less than radius
+                    if inBetween((qsx, qsy), (new_x, new_y), (x_int, y_int)):
+                        # Intersection point is on the line segment
+                        print("INTERSECT2!!!!")
+                        return False
         self.ax.plot([qsx, new_x], [qsy, new_y], color='b')
         new_node = Node((new_x, new_y))
         q_start.add_child(new_node)
         new_node.add_parent(q_start)
-        print('val',q_start.val)
-        print('children',q_start.children)
         return True
 
 

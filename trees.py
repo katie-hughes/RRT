@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+import imageio
 
 
 
@@ -56,7 +57,7 @@ class Circle:
 
 
 class RRT:
-    def __init__(self, qinit, k, delta, d, circles=False):
+    def __init__(self, qinit, k, delta, d, circles=False, img=False):
         self.qinit = qinit
         self.k = k
         self.delta = delta
@@ -80,15 +81,14 @@ class RRT:
             goaly = random.randrange(self.d[1][0], self.d[1][1])
             self.goal = (goalx, goaly)
             dst = distance(self.goal, self.qinit)
-        print(f"GOAL: {self.goal}")
+        #print(f"GOAL: {self.goal}")
         self.buff = 0.5
 
         self.maxCircleRad = 15
         self.nCircles = 10
 
-        # Plot the starting point and goal 
-        ax.scatter(qinit[0], qinit[1], color='r', label='Start')
-        ax.scatter(self.goal[0], self.goal[1], color='orange', label='end')
+        self.doImage = False
+        self.imgMap = []
 
         if circles: 
             self.doCircles = True
@@ -104,24 +104,23 @@ class RRT:
                     self.circles.append(c)
                     circle = plt.Circle(c.c, c.r, color='k')
                     self.ax.add_patch(circle)
+        if img: 
+            self.doImage = True
+            image = imageio.imread('N_map.png')
+            self.goal = (60, 60) 
+            print(image)
+            print(image.shape)
+            image = np.flipud(image)
+            ax.imshow(image, cmap="gray", origin='lower')
+            self.imgMap = image
+
+        # Plot the starting point and goal 
+        ax.scatter(qinit[0], qinit[1], color='r', label='Start='+str(self.qinit))
+        ax.scatter(self.goal[0], self.goal[1], color='orange', label='end='+str(self.goal))
+        self.ax.set_aspect('equal')
+        
                     
-            #c1 = Circle((45,45), 4)
-            #c2 = Circle((70,20), 10)
-            #self.circles.append(c1)
-            #self.circles.append(c2)
-
-            #print("Circles:", c1.c, c1.r)
-
             
-            #circle1 = plt.Circle(c1.c, c1.r, color='k')
-            #circle2 = plt.Circle(c2.c, c2.r, color='k')
-            
-            #self.ax.add_patch(circle1)
-            #self.ax.add_patch(circle2)
-            #ax.scatter([d[0][0], d[0][1], qinit[0]], [d[1][0], d[1][1], qinit[1]])
-            self.ax.set_aspect('equal')
-            self.fig.show()
-            #plt.show()
             
     
     
@@ -241,9 +240,9 @@ class RRT:
 
 
 d = [(0,100),(0,100)]
-qinit = (50,50)
+qinit = (40,40)
 delta = 1
-k = 5000
+k = 50
 #Task1 = RRT(qinit, k, delta, d)
 #Task1.go()
 
@@ -251,5 +250,9 @@ k = 5000
 
 
 
-Task2 = RRT(qinit, k, delta, d, circles=True)
-Task2.go()
+#Task2 = RRT(qinit, k, delta, d, circles=True)
+#Task2.go()
+
+
+Task3 = RRT(qinit, k, delta, d, img=True)
+Task3.go()

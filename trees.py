@@ -176,8 +176,8 @@ class RRT:
             new_x = qsx + x
             new_y = qsy + y
         print('New candidate point:', new_x, new_y)
+        slope = (new_y - qsy) / (new_x - qsx)
         if self.doCircles: 
-            slope = (new_y - qsy) / (new_x - qsx)
             #print("SLOPE:", slope)
             b = new_y - slope*new_x
             #print("B:", b)
@@ -186,9 +186,6 @@ class RRT:
                 tan_b = c.c[1] - tan_slope*c.c[0]
                 x_int = (b - tan_b)/(tan_slope - slope)
                 y_int = tan_slope*x_int+tan_b
-                #print("x and y int are", x_int, y_int)
-                #print("X lims are", qsx, new_x)
-                #print("y lims are", qsy, new_y)
                 if distance((new_x, new_y), c.c) < c.r:
                     # The new point is inside of the circle (bad)
                     print("New point intersects!")
@@ -199,6 +196,24 @@ class RRT:
                         # Intersection point is on the line segment
                         print("Line intersects!")
                         return None
+        if self.doImage: 
+            # very naive approach
+            pixels = []
+            if new_x > qsx: 
+                if new_y > qsy: 
+                    if 0 < slope < 1: 
+                        print("AAAAAAAHHHh")
+                        self.bres((qsx, qsy), (new_x, new_y))
+                    else: 
+                        print("STEEP ")
+            for p in pixels: 
+                pixel = self.imgMap[round(new_x)][round(new_y)]
+                print(pixel, end=' ')
+                if pixel != 255:
+                   print("bad") 
+                   return None
+                else: 
+                   print("ok")
         self.ax.plot([qsx, new_x], [qsy, new_y], color='b')
         new_node = Node((new_x, new_y))
         q_start.add_child(new_node)
@@ -208,6 +223,10 @@ class RRT:
             return new_node
         else: 
             return None
+    
+    def bres(self, start, end): 
+        print(f"Start: {start}")
+        print(f"End: {end}")
 
     def drawPath(self, node, co): 
         current = node.val

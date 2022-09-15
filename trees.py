@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import imageio
-
+import math
 
 
 def distance(p1, p2):
@@ -177,10 +177,8 @@ class RRT:
             new_y = qsy + y
         print('New candidate point:', new_x, new_y)
         slope = (new_y - qsy) / (new_x - qsx)
+        b = new_y - slope*new_x
         if self.doCircles: 
-            #print("SLOPE:", slope)
-            b = new_y - slope*new_x
-            #print("B:", b)
             tan_slope = -1./slope
             for c in self.circles: 
                 tan_b = c.c[1] - tan_slope*c.c[0]
@@ -203,17 +201,27 @@ class RRT:
                 if new_y > qsy: 
                     if 0 < slope < 1: 
                         print("AAAAAAAHHHh")
-                        self.bres((qsx, qsy), (new_x, new_y))
+                        pixels += self.bres1((qsx, qsy), (new_x, new_y), slope, b)
                     else: 
                         print("STEEP ")
+                        pixels += self.bres2((qsx, qsy), (new_x, new_y), slope, b)
+                else: 
+                    if 0 < np.abs(slope) < 1: 
+                        print('idk')
+                        pixels += self.bres1((qsx, qsy), (new_x, new_y), slope, b)
+                    else: 
+                        print("We out here")
+                        pixels += self.bres2((qsx, qsy), (new_x, new_y), slope, b)
+
+
             for p in pixels: 
-                pixel = self.imgMap[round(new_x)][round(new_y)]
-                print(pixel, end=' ')
-                if pixel != 255:
-                   print("bad") 
+                print(p)
+                if self.pixelOccupied(p):
+                   print("bad pixel", p) 
                    return None
                 else: 
-                   print("ok")
+                   print("ok pixel", p)
+        print("drawing line")
         self.ax.plot([qsx, new_x], [qsy, new_y], color='b')
         new_node = Node((new_x, new_y))
         q_start.add_child(new_node)
@@ -223,10 +231,52 @@ class RRT:
             return new_node
         else: 
             return None
+
+    def pixelOccupied(self, point): 
+        # 0 is black, 255 is white 
+        return (self.imgMap[point[0]][point[1]] == 0)
     
-    def bres(self, start, end): 
+    def bres1(self, start, end, slope, b): 
+        # startx < endx and starty < endy and 0 < slope < 1
+        # iterate through x
         print(f"Start: {start}")
         print(f"End: {end}")
+        curr_x = math.floor(start[0])
+        final_x = math.floor(end[0])
+        pixels = []
+        while curr_x < final_x+1: 
+            print(f"Curr x: {curr_x}")
+            curr_y = slope*curr_x + b
+            curr_y = math.floor(curr_y)
+            print(f"curr y: {curr_y}")
+            # check above and below
+            pixels.append((curr_x, curr_y-1))
+            pixels.append((curr_x, curr_y))
+            pixels.append((curr_x, curr_y+1))
+            curr_x += 1
+        return pixels
+
+    def bres2(self, start, end, slope, b): 
+        # startx < endx and starty < endy and slope > 1
+        # iterate through y 
+        print(f"Start: {start}")
+        print(f"End: {end}")
+        curr_y = math.floor(start[1])
+        final_y = math.floor(end[1])
+        pixels = []
+        while curr_y < final_y+1: 
+            print(f"Curr y: {curr_y}")
+            curr_x = (curr_y - b)/slope
+            curr_x = math.floor(curr_x)
+            print(f"curr x: {curr_x}")
+            # check above and below
+            pixels.append((curr_x-1, curr_y))
+            pixels.append((curr_x, curr_y))
+            pixels.append((curr_x+1, curr_y))
+            curr_y += 1
+        return pixels
+
+
 
     def drawPath(self, node, co): 
         current = node.val
@@ -261,7 +311,7 @@ class RRT:
 d = [(0,100),(0,100)]
 qinit = (40,40)
 delta = 1
-k = 50
+k = 200
 #Task1 = RRT(qinit, k, delta, d)
 #Task1.go()
 

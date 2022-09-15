@@ -163,6 +163,7 @@ class RRT:
         ## CHECK DIV BY 0
         # generate new tree config by moving delta from one vertex to another
         if qdx == qsx: 
+            print("SLOPE 0 returning")
             return None
         theta = np.arctan((qdy - qsy)/(qdx - qsx))
         #print(theta*180/np.pi, "deg")
@@ -176,6 +177,9 @@ class RRT:
             new_x = qsx + x
             new_y = qsy + y
         print('New candidate point:', new_x, new_y)
+        if (new_x - qsx) == 0: 
+            print("SLOPE 0 RETURNING @")
+            return None
         slope = (new_y - qsy) / (new_x - qsx)
         b = new_y - slope*new_x
         if self.doCircles: 
@@ -199,7 +203,7 @@ class RRT:
             pixels = []
             if new_x > qsx: 
                 if new_y > qsy: 
-                    if 0 < slope < 1: 
+                    if 0 < np.abs(slope) < 1: 
                         print("ONE")
                         pixels += self.bres1((qsx, qsy), (new_x, new_y), slope, b)
                     else: 
@@ -213,8 +217,20 @@ class RRT:
                         print("FOUR")
                         pixels += self.bres4((qsx, qsy), (new_x, new_y), slope, b)
             else: 
-                print("nope")
-                return None
+                if new_y > qsy: 
+                    if 0 < np.abs(slope) < 1: 
+                        print("FIVE")
+                        pixels += self.bres3((new_x, new_y), (qsx, qsy), slope, b)
+                    else: 
+                        print("SIX")
+                        pixels += self.bres4((new_x, new_y), (qsx, qsy), slope, b)
+                else: 
+                    if 0 < np.abs(slope) < 1: 
+                        print('SEVEN')
+                        pixels += self.bres1((new_x, new_y), (qsx, qsy), slope, b)
+                    else: 
+                        print("EIGHT")
+                        pixels += self.bres2((new_x, new_y), (qsx, qsy), slope, b)
 
             print("Checking pixels")
             for p in pixels: 
@@ -350,8 +366,8 @@ class RRT:
 
 d = [(0,100),(0,100)]
 qinit = (40,40)
-delta = 5
-k = 10000
+delta = 2
+k = 5000
 #Task1 = RRT(qinit, k, delta, d)
 #Task1.go()
 

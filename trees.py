@@ -200,22 +200,24 @@ class RRT:
             if new_x > qsx: 
                 if new_y > qsy: 
                     if 0 < slope < 1: 
-                        print("AAAAAAAHHHh")
+                        print("ONE")
                         pixels += self.bres1((qsx, qsy), (new_x, new_y), slope, b)
                     else: 
-                        print("STEEP ")
+                        print("TWO")
                         pixels += self.bres2((qsx, qsy), (new_x, new_y), slope, b)
                 else: 
                     if 0 < np.abs(slope) < 1: 
-                        print('idk')
-                        pixels += self.bres1((qsx, qsy), (new_x, new_y), slope, b)
+                        print('THREE')
+                        pixels += self.bres3((qsx, qsy), (new_x, new_y), slope, b)
                     else: 
-                        print("We out here")
-                        pixels += self.bres2((qsx, qsy), (new_x, new_y), slope, b)
+                        print("FOUR")
+                        pixels += self.bres4((qsx, qsy), (new_x, new_y), slope, b)
+            else: 
+                print("nope")
+                return None
 
-
+            print("Checking pixels")
             for p in pixels: 
-                print(p)
                 if self.pixelOccupied(p):
                    print("bad pixel", p) 
                    return None
@@ -234,7 +236,9 @@ class RRT:
 
     def pixelOccupied(self, point): 
         # 0 is black, 255 is white 
-        return (self.imgMap[point[0]][point[1]] == 0)
+        px = self.imgMap[point[0]][point[1]]
+        print(px)
+        return (px == 0)
     
     def bres1(self, start, end, slope, b): 
         # startx < endx and starty < endy and 0 < slope < 1
@@ -245,10 +249,9 @@ class RRT:
         final_x = math.floor(end[0])
         pixels = []
         while curr_x < final_x+1: 
-            print(f"Curr x: {curr_x}")
             curr_y = slope*curr_x + b
             curr_y = math.floor(curr_y)
-            print(f"curr y: {curr_y}")
+            print(f"current point:({curr_x},{curr_y})")
             # check above and below
             pixels.append((curr_x, curr_y-1))
             pixels.append((curr_x, curr_y))
@@ -265,15 +268,52 @@ class RRT:
         final_y = math.floor(end[1])
         pixels = []
         while curr_y < final_y+1: 
-            print(f"Curr y: {curr_y}")
             curr_x = (curr_y - b)/slope
             curr_x = math.floor(curr_x)
-            print(f"curr x: {curr_x}")
+            print(f"current point:({curr_x},{curr_y})")
             # check above and below
             pixels.append((curr_x-1, curr_y))
             pixels.append((curr_x, curr_y))
             pixels.append((curr_x+1, curr_y))
             curr_y += 1
+        return pixels
+
+    def bres3(self, start, end, slope, b): 
+        # startx < endx and starty > endy and 0 < |slope| < 1
+        # iterate through x
+        print(f"Start: {start}")
+        print(f"End: {end}")
+        curr_x = math.floor(start[0])
+        final_x = math.floor(end[0])
+        pixels = []
+        while curr_x < final_x+1: 
+            curr_y = slope*curr_x + b
+            curr_y = math.floor(curr_y)
+            print(f"current point:({curr_x},{curr_y})")
+            # check above and below
+            pixels.append((curr_x, curr_y-1))
+            pixels.append((curr_x, curr_y))
+            pixels.append((curr_x, curr_y+1))
+            curr_x += 1
+        return pixels
+
+    def bres4(self, start, end, slope, b): 
+        # startx < endx and starty > endy and |slope| > 1
+        # iterate through y 
+        print(f"Start: {start}")
+        print(f"End: {end}")
+        curr_y = math.floor(start[1])
+        final_y = math.floor(end[1])
+        pixels = []
+        while curr_y > final_y+1: 
+            curr_x = (curr_y - b)/slope
+            curr_x = math.floor(curr_x)
+            print(f"current point:({curr_x},{curr_y})")
+            # check above and below
+            pixels.append((curr_x-1, curr_y))
+            pixels.append((curr_x, curr_y))
+            pixels.append((curr_x+1, curr_y))
+            curr_y -= 1
         return pixels
 
 
@@ -310,8 +350,8 @@ class RRT:
 
 d = [(0,100),(0,100)]
 qinit = (40,40)
-delta = 1
-k = 200
+delta = 10
+k = 1000
 #Task1 = RRT(qinit, k, delta, d)
 #Task1.go()
 

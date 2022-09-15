@@ -82,7 +82,7 @@ class RRT:
             self.goal = (goalx, goaly)
             dst = distance(self.goal, self.qinit)
         #print(f"GOAL: {self.goal}")
-        self.buff = 0.5
+        self.buff = self.delta/2.
 
         self.maxCircleRad = 15
         self.nCircles = 10
@@ -115,8 +115,7 @@ class RRT:
             self.imgMap = image
 
         # Plot the starting point and goal 
-        ax.scatter(qinit[0], qinit[1], color='r', label='Start='+str(self.qinit))
-        ax.scatter(self.goal[0], self.goal[1], color='orange', label='end='+str(self.goal))
+        
         self.ax.set_aspect('equal')
         
                     
@@ -177,8 +176,11 @@ class RRT:
             new_x = qsx + x
             new_y = qsy + y
         print('New candidate point:', new_x, new_y)
-        if (new_x - qsx) == 0: 
-            print("SLOPE 0 RETURNING @")
+        if not ((self.d[0][0] < new_x < self.d[0][1]) and (self.d[1][0] < new_y < self.d[1][1])):
+            print("OUT OF BOUDNS")
+            return None
+        if (new_x == qsx or new_y == qsy): 
+            print("dont want to deal with this case")
             return None
         slope = (new_y - qsy) / (new_x - qsx)
         b = new_y - slope*new_x
@@ -235,10 +237,11 @@ class RRT:
             print("Checking pixels")
             for p in pixels: 
                 if self.pixelOccupied(p):
-                   print("bad pixel", p) 
+                   #print("bad pixel", p) 
                    return None
-                else: 
-                   print("ok pixel", p)
+                else:
+                    pass 
+                   #print("ok pixel", p)
         print("drawing line")
         self.ax.plot([qsx, new_x], [qsy, new_y], color='b')
         new_node = Node((new_x, new_y))
@@ -253,7 +256,7 @@ class RRT:
     def pixelOccupied(self, point): 
         # 0 is black, 255 is white 
         px = self.imgMap[point[1]][point[0]]
-        print(px)
+        #print(px)
         return (px == 0)
     
     def bres1(self, start, end, slope, b): 
@@ -359,15 +362,17 @@ class RRT:
 
         print(f"Start: {self.qinit}")
         print(f"End: {self.goal}")
-        
-        plt.legend()
+        self.ax.scatter(qinit[0], qinit[1], color='r', label='Start')
+        self.ax.scatter(self.goal[0], self.goal[1], color='orange', label='End')
+
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.show()
 
 
 d = [(0,100),(0,100)]
 qinit = (40,40)
 delta = 2
-k = 5000
+k = 10000
 #Task1 = RRT(qinit, k, delta, d)
 #Task1.go()
 

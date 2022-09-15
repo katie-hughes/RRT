@@ -235,6 +235,10 @@ class RRT:
                         pixels += self.bres2((new_x, new_y), (qsx, qsy), slope, b)
 
             print("Checking pixels")
+            print(pixels)
+            if len(pixels) == 0: 
+                print("PIXELS EMPTY")
+                exit()
             for p in pixels: 
                 if self.pixelOccupied(p):
                    #print("bad pixel", p) 
@@ -324,7 +328,7 @@ class RRT:
         curr_y = math.floor(start[1])
         final_y = math.floor(end[1])
         pixels = []
-        while curr_y > final_y+1: 
+        while curr_y > final_y-1: 
             curr_x = (curr_y - b)/slope
             curr_x = math.floor(curr_x)
             print(f"current point:({curr_x},{curr_y})")
@@ -371,8 +375,8 @@ class RRT:
 
 d = [(0,100),(0,100)]
 qinit = (40,40)
-delta = 2
-k = 10000
+delta = 1
+k = 5000
 #Task1 = RRT(qinit, k, delta, d)
 #Task1.go()
 

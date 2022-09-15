@@ -236,7 +236,7 @@ class RRT:
 
     def pixelOccupied(self, point): 
         # 0 is black, 255 is white 
-        px = self.imgMap[point[0]][point[1]]
+        px = self.imgMap[point[1]][point[0]]
         print(px)
         return (px == 0)
     
@@ -350,8 +350,8 @@ class RRT:
 
 d = [(0,100),(0,100)]
 qinit = (40,40)
-delta = 10
-k = 1000
+delta = 5
+k = 10000
 #Task1 = RRT(qinit, k, delta, d)
 #Task1.go()
 

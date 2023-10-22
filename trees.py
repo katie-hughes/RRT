@@ -27,12 +27,10 @@ def inBetween(a, b, c):
 
 
 class Node:
-    def __init__(self,val):
-        self.parent = None
+    def __init__(self,val,parent):
+        self.parent = parent
         self.val = val
         self.children = []
-    def add_parent(self, p):
-        self.parent = p
     def add_child(self, c):
         self.children.append(c)
     def pr(self,lvl=0):
@@ -57,7 +55,7 @@ class RRT:
         self.d = d
         self.verbose = verbose
 
-        self.g = Node(qinit)
+        self.g = Node(qinit,parent=None)
         self.g.pr()
 
         self.circles = []
@@ -74,7 +72,7 @@ class RRT:
             goaly = random.randrange(self.d[1][0], self.d[1][1])
             self.goal = (goalx, goaly)
             dst = distance(self.goal, self.qinit)
-        self.buff = self.delta/2.
+        self.buff = 2*self.delta
 
         self.maxCircleRad = 15
         self.nCircles = 10
@@ -228,11 +226,10 @@ class RRT:
                     pass 
         if self.verbose: print("drawing line")
         self.ax.plot([qsx, new_x], [qsy, new_y], color='b')
-        new_node = Node((new_x, new_y))
+        new_node = Node(val=(new_x, new_y), parent=q_start)
         q_start.add_child(new_node)
-        new_node.add_parent(q_start)
         if distance((new_x, new_y), self.goal) < self.buff: 
-            if self.verbose: print("WE HAVE REACHED GOAL!")
+            print("Goal Reached!!")
             return new_node
         else: 
             return None
@@ -341,8 +338,10 @@ class RRT:
 
         print(f"Start: {self.qinit}")
         print(f"End: {self.goal}")
-        self.ax.scatter(self.qinit[0], self.qinit[1], color='r', label='Start')
-        self.ax.scatter(self.goal[0], self.goal[1], color='orange', label='End')
+        self.ax.scatter(self.qinit[0], self.qinit[1], color='r',
+                        label=f'Start\n({self.qinit[0]},{self.qinit[1]})')
+        self.ax.scatter(self.goal[0], self.goal[1], color='orange',
+                        label=f'End\n({self.goal[0]},{self.goal[1]})')
 
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.show()
@@ -359,9 +358,14 @@ def main():
     parser.add_argument('-v', '--verbose', action='store_true', help='Print out debug messages')
     args = parser.parse_args()
 
+    # some parameters of the RRT
+    # domain of the graph: 100x100
     d = [(0,100),(0,100)]
+    # starting position
     qinit = (40,40)
+    # increment distance
     delta = 1
+    # number of vertices in the RRT
     k = 5000
 
     print(f"You have chosen task {args.task}!")

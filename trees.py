@@ -336,15 +336,13 @@ class RRT:
                 self.drawPath(qnew, self.goal)
                 break
 
-        print(f"Start: {self.qinit}")
-        print(f"End: {self.goal}")
         self.ax.scatter(self.qinit[0], self.qinit[1], color='r',
-                        label=f'Start\n({self.qinit[0]},{self.qinit[1]})')
+                        label=f'Start\n{self.qinit}')
         self.ax.scatter(self.goal[0], self.goal[1], color='orange',
-                        label=f'End\n({self.goal[0]},{self.goal[1]})')
+                        label=f'End\n{self.goal}')
 
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-        plt.show()
+        
 
 def main():
     parser = argparse.ArgumentParser(
@@ -365,19 +363,25 @@ def main():
     qinit = (40,40)
     # increment distance
     delta = 1
-    # number of vertices in the RRT
-    k = 5000
+    # number of iterations
+    k = 10000
 
     print(f"You have chosen task {args.task}!")
     if args.task == 1:
         Task1 = RRT(qinit, k, delta, d, verbose=args.verbose)
         Task1.go()
+        plt.savefig('images/task1.png')
+        plt.show()
     elif args.task == 2:
         Task2 = RRT(qinit, k, delta, d, circles=True, verbose=args.verbose)
         Task2.go()
+        plt.savefig('images/task2.png')
+        plt.show()
     elif args.task == 3:
         Task3 = RRT(qinit, k, delta, d, img=True, verbose=args.verbose)
         Task3.go()
+        plt.savefig('images/task3.png')
+        plt.show()
 
 if __name__ == "__main__":
     main()

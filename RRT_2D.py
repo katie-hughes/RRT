@@ -48,22 +48,26 @@ class Circle:
         return (distance(self.c, point) <= self.r)
 
 class RRT:
-    def __init__(self, qinit, k, delta, d, circles=False, img=False, verbose=False):
+    def __init__(self, qinit, k, delta, d, circles=False, img=False, dim=2, verbose=False):
+        # starting position
         self.qinit = qinit
+        # number of steps
         self.k = k
+        # step size
         self.delta = delta
+        # domain of graph
         self.d = d
+        # print out extra info
         self.verbose = verbose
-
+        # keep track of the graph structure of connected nodes
         self.g = Node(qinit,parent=None)
-        self.g.pr()
 
-        self.circles = []
-        self.doCircles = False
+        # plotting 
         fig, ax = plt.subplots()
         self.fig = fig
         self.ax = ax
 
+        # set a random goal position that is at least 10 units away from the start
         dst = 0 
         goalx = -1
         goaly = -1
@@ -72,16 +76,15 @@ class RRT:
             goaly = random.randrange(self.d[1][0], self.d[1][1])
             self.goal = (goalx, goaly)
             dst = distance(self.goal, self.qinit)
+        # buffer for reaching goal
         self.buff = 2*self.delta
 
+        # CIRCULAR OBSTACLES
+        self.doCircles = circles
+        self.circles = []
         self.maxCircleRad = 15
         self.nCircles = 10
-
-        self.doImage = False
-        self.imgMap = []
-
-        if circles: 
-            self.doCircles = True
+        if self.doCircles:
             print("Running with circles!")
             for n in range(0, self.nCircles): 
                 x = random.randrange(self.d[0][0], self.d[0][1])
@@ -95,27 +98,28 @@ class RRT:
                     self.circles.append(c)
                     circle = plt.Circle(c.c, c.r, color='k')
                     self.ax.add_patch(circle)
-        if img: 
-            self.doImage = True
+
+        # SET UP IMAGE
+        self.doImage = img
+        self.imgMap = []
+        if self.doImage:
             image = imageio.imread('N_map.png')
             if len(image.shape) > 2:
                 # make pixels black/white
                 image = image[:,:,:1]
                 image = image.reshape([image.shape[0], image.shape[1]])
+            # goal is hardcoded in this case
             self.goal = (60, 60) 
             image = np.flipud(image)
-            ax.imshow(image, cmap="gray", origin='lower')
+            self.ax.imshow(image, cmap="gray", origin='lower')
             self.imgMap = image
-
-        # Plot the starting point and goal  
         self.ax.set_aspect('equal')
         
     def random_configuration(self):
         #Generate random position in the domain
         x = random.randrange(self.d[0][0], self.d[0][1])
         y = random.randrange(self.d[1][0], self.d[1][1])
-        if self.verbose:
-            print("Random:", x,y)
+        if self.verbose: print("Random:", x,y)
         return (x,y)
     
     def nearest_vertex(self, nd, pos):
@@ -138,8 +142,7 @@ class RRT:
         ## CHECK DIV BY 0
         # generate new tree config by moving delta from one vertex to another
         if qdx == qsx:
-            if self.verbose:
-                print("SLOPE 0 returning")
+            if self.verbose: print("SLOPE IS 0")
             return None
         theta = np.arctan((qdy - qsy)/(qdx - qsx))
         y = self.delta * np.sin(theta)
@@ -150,15 +153,12 @@ class RRT:
         else: 
             new_x = qsx + x
             new_y = qsy + y
-        if self.verbose:
-            print('New candidate point:', new_x, new_y)
+        if self.verbose: print('New candidate point:', new_x, new_y)
         if not ((self.d[0][0] < new_x < self.d[0][1]) and (self.d[1][0] < new_y < self.d[1][1])):
-            if self.verbose:
-                print("OUT OF BOUDNS")
+            if self.verbose: print("OUT OF BOUDNS")
             return None
         if (new_x == qsx or new_y == qsy): 
-            if self.verbose:
-                print("dont want to deal with this case")
+            if self.verbose: print("dont want to deal with this case")
             return None
         slope = (new_y - qsy) / (new_x - qsx)
         b = new_y - slope*new_x
@@ -170,15 +170,13 @@ class RRT:
                 y_int = tan_slope*x_int+tan_b
                 if distance((new_x, new_y), c.c) < c.r:
                     # The new point is inside of the circle (bad)
-                    if self.verbose:
-                        print("New point intersects!")
+                    if self.verbose: print("New point intersects!")
                     return None
                 if distance((x_int, y_int), c.c) < c.r: 
                     # Intersection point is less than radius
                     if inBetween((qsx, qsy), (new_x, new_y), (x_int, y_int)):
                         # Intersection point is on the line segment
-                        if self.verbose:
-                            print("Line intersects!")
+                        if self.verbose: print("Line intersects!")
                         return None
         if self.doImage: 
             # very naive approach
@@ -328,11 +326,12 @@ class RRT:
         if self.verbose: print("GO")
         for i in range(0, self.k):
             if self.verbose: print(f'\n')
-            if (i % 100 == 0):print(f'{i}/{self.k}')
+            if (i % 1000 == 0):print(f'{i}/{self.k}')
             qrand = self.random_configuration()
             qnear_dist, qnear = self.nearest_vertex(self.g, qrand)
             qnew = self.new_configuration(qnear, qrand)
             if qnew is not None: 
+                print(f"Finished after {i} iterations!")
                 self.drawPath(qnew, self.goal)
                 break
 
@@ -352,7 +351,8 @@ def main():
                         help="Which task of the RRT to implement.\n \
                               1: basic functionality\n \
                               2: RRT with circles\n \
-                              3: RRT on image\n")
+                              3: RRT on image\n\
+                              4: 3D RRT")
     parser.add_argument('-v', '--verbose', action='store_true', help='Print out debug messages')
     args = parser.parse_args()
 

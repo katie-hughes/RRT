@@ -1,11 +1,12 @@
 # Rapidly Exploring Random Tree (RRT)
 Author: Katie Hughes
 
-This implements a RRT algorithm in 2D space. 
+This repo implements a RRT in 2 and 3 dimensional space.
 
-To run the algorithm:
+## 2D algorithm
+To run:
 
-`python3 trees.py -t [task number]`
+`python3 RRT_2D.py -t [task number]`
 
 Tasks:
 1. RRT with no obstacles
@@ -22,3 +23,12 @@ Tasks:
 
 
 Additionally, you can pass the `-v` flag to print out more information about what is happening during each iteration of the algorithm.
+
+## 3D algorithm
+
+To run:
+
+`python3 RRT_3D.py`
+![3D](images/3d.png)
+
+The `-v` flag is also an option here!
